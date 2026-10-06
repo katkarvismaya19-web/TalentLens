@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
 
 const CONTACT = "katkarvismaya19@gmail.com";
@@ -32,7 +32,7 @@ export function Privacy() {
     <Page title="Privacy policy">
       <p>TalentLens is a recruitment and employee-retention tool. This page explains what information it collects, why, and what you can do about it.</p>
       <h2>What we collect</h2>
-      <p>When you create a candidate account: your name and email address, or your phone number if you sign in with one. If you sign in with Google or Microsoft, we receive only your name, email address and profile picture from that provider. We never receive your Google or Microsoft password.</p>
+      <p>When you create a candidate account: your name and email address, or your phone number if you sign in with one. If you sign in with Google, we receive only your name, email address and profile picture from that provider. We never receive your Google password.</p>
       <p>When you apply for a job: the resume file you upload, the text in it, and any note you add. The resume is read automatically to find skills, experience and education, and compared with the job description to produce a match score for the hiring team.</p>
       <p>For HR team members: name, work email and an HR ID used to sign in. HR may also enter employee records (such as role, salary band and satisfaction scores) to estimate attrition risk.</p>
       <p>We keep a log of sign-ins and changes for security.</p>
@@ -41,7 +41,7 @@ export function Privacy() {
       <h2>Where it's stored</h2>
       <p>On the app's hosting provider and its database provider. Passwords are stored only as secure hashes, sign-in codes are stored only as hashes, and connections are encrypted.</p>
       <h2>Your choices</h2>
-      <p>You can ask for a copy of your data, or for your account and applications to be deleted, by emailing <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. You can also remove TalentLens' access from your Google or Microsoft account settings at any time.</p>
+      <p>You can ask for a copy of your data, or for your account and applications to be deleted, by emailing <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. You can also remove TalentLens' access from your Google account settings at any time.</p>
       <h2>Contact</h2>
       <p>Questions about this policy: <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.</p>
     </Page>

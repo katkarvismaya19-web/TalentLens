@@ -1,4 +1,4 @@
-import { Smartphone } from "lucide-react";
+﻿import { Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import PhoneSignIn from "./PhoneSignIn";
@@ -20,7 +20,6 @@ const MicrosoftLogo = () => (
 );
 const PROVIDERS = [
   { id: "google", label: "Google", Logo: GoogleLogo },
-  { id: "microsoft", label: "Microsoft", Logo: MicrosoftLogo },
 ];
 
 export default function ProviderButtons({ verb = "Continue" }) {

@@ -1,10 +1,10 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Avatar, ErrorNote, PageHeader, PageLoader } from "../../components/ui";
 import { useAuth } from "../../lib/auth";
 import { fmtDate } from "../../lib/format";
 import { useData } from "../../lib/useData";
 
-const PROVIDER = { email: "Email", google: "Google", microsoft: "Microsoft", phone: "Phone" };
+const PROVIDER = { email: "Email", google: "Google", phone: "Phone" };
 
 export default function Team() {
   const { user } = useAuth();
