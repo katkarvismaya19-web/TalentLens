@@ -3,6 +3,8 @@ import Layout from "./components/Layout";
 import { PageLoader } from "./components/ui";
 import { homeFor, useAuth } from "./lib/auth";
 import AuthCallback from "./pages/AuthCallback";
+import { Privacy, Terms } from "./pages/Legal";
+import { Privacy, Terms } from "./pages/Legal";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Careers from "./pages/candidate/Careers";
@@ -50,6 +52,10 @@ export default function App() {
       <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
       <Route path="/signup" element={<GuestOnly><Signup /></GuestOnly>} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+             <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/hr" element={<Navigate to="/hr/login" replace />} />
       <Route path="/hr/login" element={<GuestOnly><HrLogin /></GuestOnly>} />
       <Route path="/hr/signup" element={<GuestOnly><HrSignup /></GuestOnly>} />
