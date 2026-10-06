@@ -1,0 +1,28 @@
+# Local full stack: app + MySQL.  Run:  docker compose up --build   then open http://localhost:8000
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: talentlens
+    ports: ["3307:3306"]
+    volumes: [dbdata:/var/lib/mysql]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    env_file: [.env]
+    environment:
+      DATABASE_URL: mysql+pymysql://root:rootpass@db:3306/talentlens
+      PUBLIC_URL: http://localhost:8000
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dbdata:
