@@ -1,202 +1,292 @@
-# TalentLens: AI-powered recruitment and employee retention
+<div align="center">
 
-TalentLens screens resumes, ranks candidates against each job, books interviews without clashes, and predicts which employees are at risk of leaving, with the reasons behind each prediction.
+# TalentLens
 
-Two kinds of users, with separate sign-in pages:
-- **Candidates** (`/login`, `/signup`): sign in with email, Google, Microsoft or a phone number. They browse open roles, apply with a resume, and track their applications and interviews.
-- **HR team** (`/hr/login`, `/hr/signup`): an HR member signs up on the HR portal and gets a personal **HR ID** (for example `HR-7K3P-9QXM`). From then on they sign in with HR ID + password only. HR can post jobs, see ranked applicants, run the hiring pipeline, schedule interviews, monitor attrition risk and see the activity log.
+**AI-powered recruitment and employee retention platform**
 
-HR accounts are blocked from the candidate sign-in (email, Google, Microsoft and phone), and candidates are redirected away from every HR page. Lost HR IDs can be recovered on the HR sign-in page with the work email and password.
+Screens resumes, ranks candidates against each job, books interviews without clashes, and predicts which employees might leave, with the reasons why.
 
-## Features and the engineering subjects they cover
+[**Live demo**](https://talentlens-bdns.onrender.com) · [HR portal](https://talentlens-bdns.onrender.com/hr/login) · [Candidate sign-in](https://talentlens-bdns.onrender.com/login)
 
-| Module | What it does | Subjects |
-|---|---|---|
-| Resume parser | Extracts name, email, phone, skills, experience, education and links from PDF/DOCX/TXT | NLP, regular expressions |
-| Candidate matching | Score = 55% skill coverage + 30% TF-IDF cosine similarity with the job description + 15% experience fit | Machine learning, information retrieval |
-| Hiring pipeline | Applied → Shortlisted → Interview → Offer → Hired / Not selected, drag-and-drop board | Software engineering, DBMS |
-| Interview scheduler | Interval-overlap conflict check for interviewer and candidate; greedy free-slot finder | Algorithms, data structures |
-| Attrition predictor | Logistic regression with standardised features, explainable per-employee risk drivers, live what-if | Machine learning, statistics |
-| Dashboard | Funnel, applications per week, time-to-hire, department risk | Data analytics and visualisation |
-| Auth and security | Separate HR portal with personal HR IDs, bcrypt passwords, JWT sessions, OAuth 2.0 / OpenID Connect (Google, Microsoft), phone sign-in with one-time SMS codes, role-based access, audit log | Information security, computer networks |
-| Notifications | Email (SMTP), or SMS for phone-only users, on application, stage change and interview booking | Computer networks |
-| DevOps | Multi-stage Docker build, Docker Compose, Jenkins pipeline, cloud deploy on Railway | DevOps, cloud computing |
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?logo=scikitlearn&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?logo=mysql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+![Jenkins](https://img.shields.io/badge/Jenkins-D24939?logo=jenkins&logoColor=white)
 
-**Tech stack:** FastAPI (Python 3.12), SQLAlchemy, MySQL (SQLite for local dev), scikit-learn, React 18 + Vite + Tailwind CSS, Recharts, Docker, Jenkins, Railway.
-
-## Demo accounts
-
-With `SEED_DEMO=true` (the default), the first start loads sample jobs, candidates, interviews and 32 employees. All demo accounts use the password `Demo@1234`.
-
-| Sign in at | With | Who |
-|---|---|---|
-| /hr/login | HR ID `HR-DEMO-0001` | Priya Sharma, HR manager |
-| /hr/login | HR ID `HR-DEMO-0002` | Arjun Mehta, HR interviewer |
-| /login | candidate@talentlens.app | Demo candidate |
-
-Set `SEED_DEMO=false` before going live with real users.
+</div>
 
 ---
 
-## Deploy on Railway
+## Try it
 
-1. Push this folder to a new GitHub repository.
-2. On railway.app: **New Project → Deploy from GitHub repo**, and pick the repo. Railway finds the `Dockerfile`.
-3. In the same project: **+ Create → Database → MySQL**.
-4. Open the app service → **Variables → Raw Editor**, paste, and replace the secret:
-   ```
-   DATABASE_URL=${{MySQL.MYSQL_URL}}
-   JWT_SECRET=paste-a-long-random-string-here
-   PORT=8000
-   SEED_DEMO=true
-   ```
-   Generate a secret with `python -c "import secrets; print(secrets.token_urlsafe(48))"`.
-5. App service → **Settings → Networking → Generate Domain** on port **8000**.
-6. Add one more variable with that domain, then click **Deploy**:
-   ```
-   PUBLIC_URL=https://your-app.up.railway.app
-   ```
-7. Open the domain. Candidates sign in at `/login`, HR at `/hr/login` (demo HR ID `HR-DEMO-0001`).
+The live demo comes with sample jobs, candidates, interviews and employees. All demo accounts use the password **`Demo@1234`**.
 
-Every push to `main` redeploys automatically.
+| Role | Sign in at | Use |
+|---|---|---|
+| HR manager | [/hr/login](https://talentlens-bdns.onrender.com/hr/login) | HR ID **`HR-DEMO-0001`** |
+| HR interviewer | [/hr/login](https://talentlens-bdns.onrender.com/hr/login) | HR ID **`HR-DEMO-0002`** |
+| Candidate | [/login](https://talentlens-bdns.onrender.com/login) | **`candidate@talentlens.app`** |
 
-## Set up Google, Microsoft and phone sign-in
-
-Each button turns on when its variables are set. Without them, the buttons show but are disabled, and email sign-in still works.
-
-For Google and Microsoft, the **redirect URI** is:
-```
-https://your-app.up.railway.app/api/auth/oauth/<provider>/callback
-```
-where `<provider>` is `google` or `microsoft`.
-
-### Google (free)
-1. Go to console.cloud.google.com → create a project.
-2. **APIs & Services → OAuth consent screen** → External → fill in the app name and your email → add yourself as a test user.
-3. **Credentials → Create credentials → OAuth client ID** → Web application.
-4. Authorised redirect URI: `https://your-app.up.railway.app/api/auth/oauth/google/callback`. For local testing, also add `http://localhost:8000/api/auth/oauth/google/callback`.
-5. Copy the values into `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
-
-### Microsoft (free)
-1. Go to portal.azure.com → **Microsoft Entra ID → App registrations → New registration**.
-2. Supported account types: *Accounts in any organizational directory and personal Microsoft accounts*.
-3. Redirect URI: platform **Web**, `https://your-app.up.railway.app/api/auth/oauth/microsoft/callback`.
-4. **Certificates & secrets → New client secret**, and copy the **Value** (not the ID).
-5. Set `MICROSOFT_CLIENT_ID` (Application (client) ID) and `MICROSOFT_CLIENT_SECRET`. Keep `MICROSOFT_TENANT=common`.
-
-### Phone number (one-time SMS code)
-Phone sign-in works out of the box in **demo mode**: no SMS is sent, and the code is shown on screen. This is fine for a project demo. To send real SMS:
-
-1. Sign up at twilio.com. The free trial includes credit.
-2. Get a Twilio phone number from the console.
-3. Set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM` (the Twilio number, e.g. `+15551234567`).
-4. Set `OTP_DEMO_MODE=false` so codes are never shown on screen.
-
-On the trial, Twilio only texts numbers you've verified in its console. Sending to Indian numbers at scale also needs DLT registration, which is a TRAI rule.
-
-How it works: codes are 6 digits, valid for 10 minutes and usable once. Only a hash of each code is stored. A number gets at most 5 codes an hour, with 45 seconds between requests, and 5 wrong tries cancel the code. Numbers without a country code are treated as Indian (`DEFAULT_COUNTRY_CODE=+91`).
-
-### Who becomes HR?
-Only people who sign up on the HR portal (`/hr/signup`). Google, Microsoft, phone and the candidate sign-up page always create **candidate** accounts. Set `COMPANY_CODE` before going live. The HR sign-up page then asks for that code, so the public can't create HR accounts.
-
-## Email notifications (optional)
-With Gmail: turn on 2-step verification, create an **App Password**, then set:
-```
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=you@gmail.com
-SMTP_PASSWORD=your-16-char-app-password
-SMTP_FROM=you@gmail.com
-```
-Without SMTP, emails are written to the server log instead.
-
-## Train the attrition model on real data (optional)
-By default the model trains on a synthetic dataset that follows real attrition patterns. To use the IBM HR Analytics dataset, download `WA_Fn-UseC_-HR-Employee-Attrition.csv` from Kaggle, put it in the container or a mounted volume, and set `ATTRITION_CSV` to its path. That dataset's salaries are in US dollars, so enter employee salaries in the same unit. The **Retention → Import CSV** button also accepts that file to load employees.
+> The demo runs on a free server. If it has been idle, the first page can take up to a minute to load.
 
 ---
 
-## Run locally
+## The problem
 
-**Quickest way: one command.** It builds the frontend, connects it to the backend and starts everything on http://localhost:8000:
+Recruiters spend most of their screening time reading resumes that don't fit the role, and companies usually find out an employee was unhappy only when the resignation letter arrives. TalentLens tackles both: it puts the best-fit applicants at the top of the list, and it flags employees who show early signs of leaving, so HR can act before it's too late.
+
+## Features
+
+### For candidates
+- Sign up with **email, Google, or a mobile number** (one-time SMS code)
+- Browse open roles and apply by uploading a resume (PDF, DOCX or TXT)
+- Track every application through each stage, with interview date, time and link
+
+### For the HR team
+- **Separate HR portal.** Each HR member gets a personal **HR ID** (e.g. `HR-7K3P-9QXM`) at sign-up and signs in with HR ID + password. HR accounts can't use the candidate sign-in, and candidates can't open HR pages.
+- **Ranked applicants.** Every resume is parsed and scored against the job the moment it's uploaded, with matched and missing skills shown.
+- **Hiring pipeline.** Drag-and-drop board: Applied → Shortlisted → Interviewing → Offer → Hired / Not selected. Candidates are notified when they move.
+- **Interview scheduler.** Suggests free slots for both the interviewer and the candidate, and refuses double bookings.
+- **Retention (attrition prediction).** Risk of leaving for each employee, the main reasons behind it, and a live what-if form ("what if we give a 15% raise?").
+- **Dashboard.** Open jobs, hiring funnel, applications per week, time-to-hire, average match, upcoming interviews and retention watch.
+- **People & access** and an **activity log** of sign-ins and changes.
+
+---
+
+## How the AI works
+
+### Resume matching
+1. **Parsing.** Text is extracted from the resume, then regular expressions and a skill dictionary (110+ skills and about 200 common spellings) pull out name, email, phone, skills, years of experience, education and LinkedIn/GitHub links.
+2. **Scoring.** Each application gets a match score from 0 to 100:
+
+| Component | Weight | How it's measured |
+|---|---|---|
+| Skill coverage | 55% | Share of the job's required skills found in the resume |
+| Text similarity | 30% | TF-IDF cosine similarity between resume and job description |
+| Experience fit | 15% | Candidate's years compared with the job's minimum |
+
+When HR edits a job, every existing applicant is re-scored automatically.
+
+### Attrition prediction
+- **Model:** logistic regression on standardised features, chosen because each prediction can be explained.
+- **Features:** overtime, job satisfaction, work-life balance, environment satisfaction, years since last promotion, commute distance, salary, last salary hike, years at company, number of previous companies, and age.
+- **Explanations:** each feature's contribution is calculated per employee, so HR sees *why* someone is at risk (e.g. "Regularly works overtime", "No promotion in 4 years").
+- **Performance:** about 73% accuracy and ROC AUC 0.81 on held-out data.
+- **Data:** trains on a synthetic dataset modelled on the IBM HR Analytics attrition dataset. Set `ATTRITION_CSV` to train on the real IBM file or a company's own history.
+
+> The model estimates how *likely* someone is to leave, not *when*. It's meant to start a conversation (a stay interview, a raise, a role change), never to penalise anyone.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[Candidate / HR browser] -->|HTTPS| R[React frontend<br/>Vite + Tailwind]
+    R -->|REST + JWT| A[FastAPI backend]
+    A --> P[Resume parser<br/>pypdf, python-docx, regex]
+    A --> M[Matcher<br/>TF-IDF + skills]
+    A --> L[Attrition model<br/>scikit-learn]
+    A --> D[(MySQL)]
+    A --> G[Google OAuth]
+    A --> S[SMS / Email<br/>Twilio, SMTP]
+```
+
+The React app is built into static files and served by the FastAPI server, so the whole product ships as **one Docker container** plus a database.
+
+## Engineering subjects covered
+
+| Module | Subjects |
+|---|---|
+| Resume parser and skill extraction | Natural language processing, regular expressions |
+| Candidate matching | Machine learning, information retrieval (TF-IDF, cosine similarity) |
+| Attrition prediction | Machine learning, statistics, model evaluation |
+| Interview scheduler | Algorithms (interval overlap, greedy slot search) |
+| Hiring pipeline, roles, data model | DBMS, software engineering, OOP |
+| Authentication | Information security (bcrypt, JWT, OAuth 2.0 / OpenID Connect, OTP) |
+| Email and SMS notifications | Computer networks (SMTP, REST APIs) |
+| Build and deployment | DevOps (Docker, Jenkins CI/CD), cloud computing |
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Frontend | React 18, React Router, Vite, Tailwind CSS, Recharts, Lucide icons |
+| Backend | Python, FastAPI, SQLAlchemy, Pydantic |
+| AI / ML | scikit-learn, NumPy, pypdf, python-docx |
+| Database | MySQL (SQLite for local development) |
+| Auth | bcrypt, PyJWT, Google OAuth 2.0, phone OTP |
+| DevOps | Docker (multi-stage), Docker Compose, Jenkins, GitHub |
+| Hosting | Render (app), Aiven (MySQL), UptimeRobot (uptime) |
+
+---
+
+## Run it locally
+
+Needs **Python 3.11+** and **Node.js 20+**. No database to install: locally it uses a SQLite file automatically.
+
+**Windows (one command)**
 ```powershell
-.\run-local.ps1          # Windows PowerShell
-./run-local.sh           # macOS / Linux / WSL
+.\run-local.ps1
 ```
-If PowerShell blocks the script, run `Set-ExecutionPolicy -Scope Process Bypass` first.
+If PowerShell blocks scripts, run `Set-ExecutionPolicy -Scope Process Bypass` first.
 
-**Or run the two parts separately while developing:**
-
-**Backend** (Python 3.12):
+**macOS / Linux**
 ```bash
+./run-local.sh
+```
+
+Then open http://localhost:8000.
+
+<details>
+<summary><b>Step by step (Windows Command Prompt)</b></summary>
+
+```cmd
+cd frontend
+npm install
+npm run build
+cd ..
+xcopy /e /i /y frontend\dist backend\static
 cd backend
 python -m venv .venv
-.venv\Scripts\activate          # Windows PowerShell (macOS/Linux: source .venv/bin/activate)
-pip install -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8000
+.venv\Scripts\python -m pip install --only-binary=:all: -r requirements.txt
+.venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
-This uses a local SQLite file. API docs are at http://localhost:8000/docs.
+</details>
 
-**Frontend** (Node 20+), in a second terminal:
+<details>
+<summary><b>Full stack with Docker (app + MySQL)</b></summary>
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+</details>
+
+<details>
+<summary><b>Frontend development with hot reload</b></summary>
+
+Run the backend on port 8000 as above, then in another terminal:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 Open http://localhost:5173. API calls are proxied to port 8000.
+</details>
 
-**Full stack with Docker** (app + MySQL):
-```bash
-copy .env.example .env          # macOS/Linux: cp .env.example .env
-docker compose up --build
+---
+
+## Deploy (free)
+
+1. **Database:** create a free MySQL service on [Aiven](https://aiven.io) and copy its **Service URI**.
+2. **App:** on [Render](https://render.com), choose **New → Web Service**, pick this repo (it detects the Dockerfile), and select the **Free** instance.
+3. **Environment variables:**
 ```
-Open http://localhost:8000.
+   DATABASE_URL=<Aiven Service URI, pasted as-is>
+   JWT_SECRET=<long random text>
+   PUBLIC_URL=https://<your-app>.onrender.com
+   COMPANY_CODE=<code required to create HR accounts>
+   SEED_DEMO=true
+```
+4. **Health check path:** `/api/health`
+5. **Keep it awake:** add an [UptimeRobot](https://uptimerobot.com) monitor on `https://<your-app>.onrender.com/api/health` every 5 minutes, using the **GET** method.
 
-**Tests:**
+Every push to `main` redeploys automatically.
+
+<details>
+<summary><b>Google sign-in setup</b></summary>
+
+1. [Google Cloud Console](https://console.cloud.google.com) → create a project → **Google Auth Platform**.
+2. **Branding:** app name, support email, home page, privacy policy (`/privacy`) and terms (`/terms`) links.
+3. **Clients → Create client → Web application**, with the authorised redirect URI `https://<your-app>.onrender.com/api/auth/oauth/google/callback`.
+4. **Audience → Publish app.**
+5. Add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to the environment.
+</details>
+
+<details>
+<summary><b>Phone sign-in and email</b></summary>
+
+- **Phone (SMS codes):** works out of the box in demo mode, where the code is shown on screen. For real SMS, add `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` and `TWILIO_FROM`, then set `OTP_DEMO_MODE=false`.
+- **Email:** add `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `SMTP_FROM` (e.g. Gmail with an App Password). Without them, emails are written to the server log.
+</details>
+
+### Environment variables
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Yes (production) | MySQL connection string. Encrypted connections are used automatically when it contains `ssl-mode=REQUIRED` |
+| `JWT_SECRET` | Yes | Signs sign-in sessions |
+| `PUBLIC_URL` | Yes | The app's public address, used for Google sign-in |
+| `COMPANY_CODE` | Recommended | Code needed to create an HR account |
+| `SEED_DEMO` | No | Loads demo data on first start (`true` / `false`) |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Enables Google sign-in |
+| `TWILIO_*`, `OTP_DEMO_MODE` | No | Real SMS codes for phone sign-in |
+| `SMTP_*` | No | Email notifications |
+| `APP_TIMEZONE` | No | Defaults to `Asia/Kolkata` |
+| `ATTRITION_CSV` | No | Train the attrition model on a real dataset |
+
+See [`.env.example`](.env.example) for the full list.
+
+---
+
+## Testing and CI/CD
+
 ```bash
 cd backend
+pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-## Jenkins
-The `Jenkinsfile` runs backend tests (JUnit report), builds the frontend, builds the Docker image, starts the container and checks `/api/health` and the UI. The agent needs Python 3, Node 20+ and Docker.
+14 automated tests cover resume parsing, scoring, sign-up and sign-in (email, phone OTP and the HR portal), access control between HR and candidates, the full hiring flow, interview clash detection and attrition prediction.
+
+The **Jenkinsfile** runs the pipeline: backend tests (JUnit report) → frontend build → Docker image build → start the container → health check.
+
+## Security
+
+- Passwords hashed with **bcrypt**. Phone codes stored only as **HMAC hashes**, expire in 10 minutes, and are rate-limited.
+- **JWT** sessions with role-based access: every HR endpoint rejects candidate tokens.
+- HR accounts are created only through the HR portal, and can be locked behind a company code.
+- Encrypted database connection in production, and a non-root user inside the Docker container.
+- An activity log records sign-ins and changes.
 
 ## Project structure
+
 ```
-backend/
-  app/
-    main.py              FastAPI app, startup, serves the built frontend
-    config.py            environment settings
-    models.py            database tables (SQLAlchemy)
-    security.py          password hashing, JWT, role checks, audit log
-    seed.py              demo data
-    routers/             auth, oauth, phone, jobs + applications, interviews, employees, dashboard/admin
-    services/            resume_parser, skills, matcher, attrition (ML), mailer, sms, notify
-  tests/                 pytest suite
-frontend/
-  src/
-    pages/               candidate Login/Signup, HR portal (HrLogin, HrSignup), HR pages, candidate pages
-    components/          layout, score ring, modals, sign-in buttons, phone sign-in
-    lib/                 API client, auth context, formatting
-Dockerfile               multi-stage build (Node → Python)
-docker-compose.yml       app + MySQL for local use
-Jenkinsfile              CI/CD pipeline
+talentlens/
+├── backend/
+│   ├── app/
+│   │   ├── main.py            # FastAPI app; serves the built frontend
+│   │   ├── models.py          # Database tables
+│   │   ├── security.py        # Passwords, JWT, role checks, audit log
+│   │   ├── routers/           # auth, oauth, phone, jobs, interviews, employees, admin
+│   │   └── services/          # resume_parser, matcher, attrition, skills, mailer, sms
+│   └── tests/                 # pytest suite
+├── frontend/
+│   └── src/
+│       ├── pages/             # Candidate pages, HR portal, HR pages, privacy/terms
+│       ├── components/        # Layout, score ring, modals, sign-in buttons
+│       └── lib/               # API client, auth, formatting
+├── Dockerfile                 # Multi-stage build: Node → Python
+├── docker-compose.yml         # App + MySQL for local use
+├── Jenkinsfile                # CI/CD pipeline
+└── run-local.ps1 / .sh        # One-command local start
 ```
 
-## API overview
-| Method | Path | Who |
-|---|---|---|
-| POST | /api/auth/signup, /api/auth/login | candidates |
-| POST | /api/auth/hr/signup, /api/auth/hr/login, /api/auth/hr/recover | HR portal |
-| GET | /api/auth/oauth/{google,microsoft}/start | anyone |
-| POST | /api/auth/phone/send, /api/auth/phone/verify | anyone |
-| GET/POST/PUT/DELETE | /api/jobs, /api/jobs/{id} | HR (candidates can read open jobs) |
-| POST | /api/jobs/{id}/apply | candidate |
-| GET | /api/jobs/{id}/applicants | HR, ranked by match |
-| PATCH | /api/applications/{id}/stage | HR |
-| GET | /api/applications/mine | candidate |
-| POST | /api/interviews/suggest, /api/interviews | HR |
-| GET/POST/PUT/DELETE | /api/employees, /api/employees/predict, /api/employees/import | HR |
-| GET | /api/dashboard, /api/users, /api/audit | HR |
-| GET | /api/health | anyone |
+Interactive API documentation is available at `/docs` on any running instance.
 
-Full interactive docs: `/docs` on any running instance.
+## Limitations and future scope
+
+- **Single company:** one deployment serves one company's careers page and HR team. A multi-company (multi-tenant) version would add a companies table and scope all data by company.
+- **Attrition timing:** the model predicts likelihood, not timing. Survival analysis (e.g. a Cox model) could estimate *when*.
+- **Training data:** the demo model uses synthetic data; real use needs the company's own history.
+- **Resume parsing:** scanned image-only PDFs aren't supported; OCR could be added.
+- **Fairness:** add bias checks on match scores and predictions across groups before real-world use.
+
+## Author
+
+**Vismaya Katkar**, B.E. Computer Engineering
+GitHub: [@katkarvismaya19-web](https://github.com/katkarvismaya19-web)
